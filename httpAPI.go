@@ -15,6 +15,7 @@ type rdsHandler struct {
 
 // ServeHTTP : handle http request
 func (hdl *rdsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// fmt.Println(r)
 	var trs = TransRes{0, ""}
 
 	defer func() {
@@ -28,11 +29,11 @@ func (hdl *rdsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch action {
 	case "Insert":
-		InsertEntry(entrystr)
+		trs.status = InsertEntry(entrystr)
 	case "Remove":
-		RemoveEntry(entrystr)
+		trs.status = RemoveEntry(entrystr)
 	case "Recoever":
-		RecoverEntry(entrystr)
+		trs.status = RecoverEntry(entrystr)
 	case "GetAll":
 		trs.msg = GetAll()
 		trs.status = 1

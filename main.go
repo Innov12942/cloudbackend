@@ -21,12 +21,12 @@ func main() {
 	InsertEntry(string(estr2))
 	InsertEntry(string(estr3))
 
-	RecoverEntry(string(estr3))
+	RemoveEntry(string(estr3))
 	fmt.Println(GetAll())
 
 	err := http.ListenAndServe("0.0.0.0:80", &rdsHandler{})
 	if err != nil {
-		panic("ListenAndServe failed!")
+		panic(err)
 	}
 
 	return

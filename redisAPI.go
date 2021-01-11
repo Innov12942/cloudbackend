@@ -56,7 +56,7 @@ func InitRedis() {
 	}
 }
 
-func InsertEntry(entrystr string) {
+func InsertEntry(entrystr string) int {
 	// error check
 	if rdb1 == nil || rdb2 == nil {
 		panic("Redis not connected")
@@ -65,7 +65,7 @@ func InsertEntry(entrystr string) {
 	err := json.Unmarshal([]byte(entrystr), et)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return 1
 	}
 
 	//get key
@@ -77,18 +77,19 @@ func InsertEntry(entrystr string) {
 	_, err = rdb1.Get(ctx, key).Result()
 	if err != redis.Nil {
 		fmt.Println("InsertEntry already exists Or other error occurs")
-		return
+		return 1
 	}
 
 	// Insert entry
 	err = rdb1.Set(ctx, key, entrystr, 0).Err()
 	if err != nil {
 		fmt.Println("InsertEntry HSet error")
-		return
+		return 1
 	}
+	return 0
 }
 
-func RemoveEntry(entrystr string) {
+func RemoveEntry(entrystr string) int {
 	// error check
 	if rdb1 == nil || rdb2 == nil {
 		panic("Redis not connected")
@@ -97,7 +98,7 @@ func RemoveEntry(entrystr string) {
 	err := json.Unmarshal([]byte(entrystr), et)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return 1
 	}
 
 	//get key
@@ -109,25 +110,26 @@ func RemoveEntry(entrystr string) {
 	_, err = rdb1.Get(ctx, key).Result()
 	if err == redis.Nil || err != nil {
 		fmt.Println("RemoveEntry never exists")
-		return
+		return 1
 	}
 
 	// Remove entry
 	err = rdb1.Del(ctx, key).Err()
 	if err != nil {
 		fmt.Println("Remove HDel error")
-		return
+		return 1
 	}
 
 	// Move to Trash
 	err = rdb2.Set(ctx, key, entrystr, 14*24*time.Hour).Err()
 	if err != nil {
 		fmt.Println("Remove to trash error")
-		return
+		return 1
 	}
+	return 0
 }
 
-func RecoverEntry(entrystr string) {
+func RecoverEntry(entrystr string) int {
 	// error check
 	if rdb1 == nil || rdb2 == nil {
 		panic("Redis not connected")
@@ -136,7 +138,7 @@ func RecoverEntry(entrystr string) {
 	err := json.Unmarshal([]byte(entrystr), et)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return 1
 	}
 
 	//get key
@@ -148,22 +150,23 @@ func RecoverEntry(entrystr string) {
 	_, err = rdb2.Get(ctx, key).Result()
 	if err == redis.Nil || err != nil {
 		fmt.Println("RecoverEntry never exists")
-		return
+		return 1
 	}
 
 	// Remove entry
 	err = rdb2.Del(ctx, key).Err()
 	if err != nil {
 		fmt.Println("Recover HDel error")
-		return
+		return 1
 	}
 
 	// Move to note
 	err = rdb1.Set(ctx, key, entrystr, 0).Err()
 	if err != nil {
 		fmt.Println("Recover to Note error")
-		return
+		return 1
 	}
+	return 0
 }
 
 func GetAll() string {
